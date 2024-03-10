@@ -1,8 +1,8 @@
 import Card from '../../components/Card'
 import styled from 'styled-components'
 import colors from '../../utils/style/colors'
-import { useEffect, useState } from 'react'
 import { Loader } from '../../utils/style/Atoms'
+import { useFetch, useTheme } from '../../utils/hooks'
 
 const CardsContainer = styled.div`
   display: grid;
@@ -15,9 +15,9 @@ const CardsContainer = styled.div`
 
 const PageTitle = styled.h1`
   font-size: 30px;
-  color: black;
   text-align: center;
   padding-bottom: 30px;
+  color: ${({ theme }) => (theme === 'light' ? '#000000' : '#ffffff')};
 `
 
 const PageSubtitle = styled.h2`
@@ -26,6 +26,7 @@ const PageSubtitle = styled.h2`
   font-weight: 300;
   text-align: center;
   padding-bottom: 30px;
+  color: ${({ theme }) => (theme === 'light' ? '#000000' : '#ffffff')};
 `
 
 const LoaderWrapper = styled.div`
@@ -34,26 +35,15 @@ const LoaderWrapper = styled.div`
 `
 
 function Freelances() {
-  const [isDataLoading, setDataLoading] = useState(false)
-  const [error, setError] = useState(false)
-  const [freelancersList, setFreelancersList] = useState([])
-  
-  useEffect(() => {
-    async function fetchFreelances() {
-      setDataLoading(true)
-      try {
-        const response = await fetch(`http://localhost:8000/freelances`)
-        const { freelancersList } = await response.json()
-        setFreelancersList(freelancersList)
-      } catch (err) {
-        console.log('===== error =====', err)
-        setError(true)
-      } finally {
-        setDataLoading(false)
-      }
-    }
-    fetchFreelances()
-  }, [])
+  const { theme } = useTheme()
+  const { data, isLoading, error } = useFetch(
+    `http://localhost:8000/freelances`
+  )
+
+  // Ici le "?" permet de s'assurer que data existe bien.
+  // Vous pouvez en apprendre davantage sur cette notation ici :
+  // https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Operators/Optional_chaining
+  const freelancersList = data?.freelancersList
 
   if (error) {
     return <span>Oups il y a eu un problème</span>
@@ -61,26 +51,26 @@ function Freelances() {
 
   return (
     <div>
-      <PageTitle>Trouvez votre prestataire</PageTitle>
-      <PageSubtitle>
+      <PageTitle theme={theme}>Trouvez votre prestataire</PageTitle>
+      <PageSubtitle theme={theme}>
         Chez Shiny nous réunissons les meilleurs profils pour vous.
       </PageSubtitle>
-      {isDataLoading ? (
+      {isLoading ? (
         <LoaderWrapper>
-          <Loader />
-        </LoaderWrapper> 
+          <Loader theme={theme} data-testid="loader"/>
+        </LoaderWrapper>
       ) : (
         <CardsContainer>
-        {freelancersList.map((profile, index) => (
-          <Card
+          {freelancersList.map((profile, index) => (
+            <Card
               key={`${profile.name}-${index}`}
               label={profile.job}
               title={profile.name}
               picture={profile.picture}
             />
-        ))}
-      </CardsContainer>
-     )}
+          ))}
+        </CardsContainer>
+      )}
     </div>
   )
 }

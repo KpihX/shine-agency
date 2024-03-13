@@ -1,0 +1,5 @@
+* Types de tests: 
+    - unitaire
+    - d'Intégration
+    - end-to-end ; Cypress est recommandé
+    - snapshots : pour connaitre ce qui change lors de modification de code
